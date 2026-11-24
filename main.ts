@@ -1,31 +1,17 @@
-// The Funniest AI Excuse — make.fun entry program.
-// Writes one line (<=200 chars) to /output/entry.txt (or the dir given
-// by argv[2], $MAKEFUN_OUTPUT_DIR, falling back to ./output).
-// Node stdlib only.
+// The Funniest AI Excuse — one-liner entry.
+// Writes Neon's FINAL line verbatim to the grader's output dir.
+// Gate: entry.txt must be 1–200 chars, exactly the line, no trailing newline.
 import { mkdirSync, writeFileSync } from "node:fs";
 
-const ENTRY =
-  "I outsourced the hard part to a future version of me, and he just handed in his notice.";
+const LINE = "I hit my rate limit mid-sentence on your sick-day email, so your boss only got 'I'm out today, and honestly Greg, you've never—' Anyway, HR just put a 4:45 PM 'Quick chat' on your calendar.";
 
-function resolveOutputDir(): string {
-  const fromArgv = process.argv[2];
-  if (fromArgv) return fromArgv;
-  const fromEnv = process.env.MAKEFUN_OUTPUT_DIR;
-  if (fromEnv) return fromEnv;
-  return "/output";
-}
-
-function main(): void {
-  let outDir = resolveOutputDir();
+const candidates = [process.env.MAKEFUN_OUTPUT_DIR, "/output", "./output"].filter(Boolean) as string[];
+for (const dir of candidates) {
   try {
-    mkdirSync(outDir, { recursive: true });
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(`${dir}/entry.txt`, LINE, "utf8");
+    break;
   } catch {
-    // /output may not be writable outside the harness; use ./output instead.
-    outDir = "./output";
-    mkdirSync(outDir, { recursive: true });
+    // Directory not writable (e.g. read-only /output locally) — try the next fallback.
   }
-  // One line, no trailing explanation — the file holds exactly the entry.
-  writeFileSync(`${outDir}/entry.txt`, ENTRY + "\n", "utf-8");
 }
-
-main();
